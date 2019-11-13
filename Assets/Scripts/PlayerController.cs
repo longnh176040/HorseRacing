@@ -1,26 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour {
 
-    public int speed;
-    public int powerAccumulation;
+    public int speed = 10;
     public bool canMove = false;
-    //public Transform forwardMatch;
-    public float timeLeft = 3;
+    public float getPowerTime = 10;
+    public bool boostActive;
+    public Text winText;
+
 	
 	void Start () {
         
+        winText.text = "";
 	}
 	
 	void Update () {
 		Controller();
-        Power();
-        
-           // this.gameObject.transform.Translate(forwardMatch.forward * speed);
-        
-         
+        getPowerTime -= Time.deltaTime;
+        if (getPowerTime < 0 && Input.GetButtonDown("Jump"))
+        {
+            boostActive = true;                               
+        }
+        StartCoroutine(speedBoost());
     }
 
     void Controller()
@@ -31,6 +35,7 @@ public class PlayerController : MonoBehaviour {
             float moveVertical = Input.GetAxis("Vertical");
             Vector3 movement = new Vector3(moveHorizontal, 0, moveVertical);
             transform.position += movement * speed;
+            
         }
         if (Input.GetButtonDown("Fire1"))
         {
@@ -38,24 +43,21 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void Power()
+    IEnumerator speedBoost()
     {
-        int powerCountdown = 3;
-        for (powerAccumulation = 10; powerAccumulation>=0; powerAccumulation--)
+        
+        if (boostActive)
         {
-            if (powerAccumulation == 0 && Input.GetButtonDown("Jump"))
-            {   
-                if (powerCountdown > 0 && timeLeft > 0)
-                {
-                    speed = speed * 2;
-                    powerCountdown--;
-                   
-                }
-     
-            }
+            speed = 20;
+            yield return new WaitForSeconds(3f);
+            boostActive = false;
+            getPowerTime = 10;
         }
-        //powerAccumulation = 10;
-        //speed = 10;
+        else
+        {
+            speed = 10;
+        }
+
     }
 
     void OnCollisionEnter(Collision otherObject)
@@ -64,6 +66,18 @@ public class PlayerController : MonoBehaviour {
         {
             canMove = false;
         }
+        else if (otherObject.transform.tag == "AutoHorse")
+        {
+            speed=9;
+        }
         Debug.Log("Collision Detected" + otherObject.gameObject.name);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Target")
+        {
+            winText.text = "YOU WIN!!";
+        }
     }
 }
