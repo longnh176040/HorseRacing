@@ -68,7 +68,7 @@ public class PlayerController : MonoBehaviour {
         }
         else if (otherObject.transform.tag == "AutoHorse")
         {
-            speed=9;
+            speed--;
         }
         Debug.Log("Collision Detected" + otherObject.gameObject.name);
     }
